@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "dataset_generator",
+  "version": "0.1.0",
+  "identifier": "com.christian.dataset_generator",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "dataset_generator",
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/dsgen_32x32.png",
+      "icons/dsgen_128x128.png",
+      "icons/dsgen_256x256.png",
+      "icons/icon.icns",
+      "icons/dsgen.ico"
+    ]
+  }
+}
