@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDatasetGenerator } from '@/hooks/useDatasetGenerator';
 import {
   AppLayout,
@@ -8,8 +8,12 @@ import {
   GenerationProgress,
   ExportDataset,
 } from '@/components';
+import { KnowledgeBaseDashboard } from '@/components/KnowledgeBaseDashboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Database, Zap } from 'lucide-react';
 
 const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('generator');
   const {
     models,
     selectedModel,
@@ -48,6 +52,8 @@ const App: React.FC = () => {
             onConfigChange={actions.updateGenerationConfig}
             onBack={() => actions.setCurrentStep('models')}
             onStart={actions.startGeneration}
+            onImprovePrompt={actions.improvePrompt}
+            onGenerateUseCases={actions.generateUseCaseSuggestions}
           />
         );
 
@@ -76,8 +82,27 @@ const App: React.FC = () => {
 
   return (
     <AppLayout error={error} success={success}>
-      <StepIndicator currentStep={currentStep} />
-      {renderCurrentStep()}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="generator" className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            Dataset Generator
+          </TabsTrigger>
+          <TabsTrigger value="knowledge-base" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Knowledge Base
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="generator">
+          <StepIndicator currentStep={currentStep} />
+          {renderCurrentStep()}
+        </TabsContent>
+
+        <TabsContent value="knowledge-base">
+          <KnowledgeBaseDashboard />
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 };

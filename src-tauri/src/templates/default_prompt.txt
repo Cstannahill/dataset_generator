@@ -1,0 +1,47 @@
+Generate exactly {batch_size} high-quality training examples for the following fine-tuning objective:
+
+OBJECTIVE: {use_case}
+DOMAIN CONTEXT: {domain_context}
+FORMAT: {format}
+
+## CORE REQUIREMENTS
+
+1. **Relevance**: Each example must directly serve the stated objective
+2. **Quality**: Ensure clarity, accuracy, and completeness in all fields
+3. **Diversity**: Vary complexity levels, topics, and approaches
+4. **Format Compliance**: Follow the exact structure required for {format}
+5. **Practical Value**: Create realistic, useful training scenarios
+
+## GENERATION GUIDELINES
+
+### Content Quality Standards:
+- Instructions should be clear, specific, and actionable
+- Inputs should provide relevant context or data when needed
+- Outputs should be comprehensive, helpful, and directly address the instruction
+- Maintain professional tone while being engaging
+- Ensure factual accuracy and logical consistency
+
+### Diversity Requirements:
+- Include beginner, intermediate, and advanced complexity levels
+- Cover multiple sub-topics within the domain
+- Use various question types and response styles
+- Explore different perspectives and use cases
+- Vary response lengths appropriately
+
+### Avoid Common Issues:
+- Generic or template-like responses
+- Incomplete or vague instructions
+- Outputs that don't match the instruction
+- Repetitive patterns across examples
+- Overly complex language where simplicity is better
+
+## OUTPUT FORMAT
+
+Return ONLY a valid JSON array with no additional text or explanation:
+
+[
+  {"instruction": "...", "input": "...", "output": "..."},
+  {"instruction": "...", "input": "...", "output": "..."}
+]
+
+Each entry must be complete, self-contained, and ready for training use.

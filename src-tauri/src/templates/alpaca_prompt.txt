@@ -1,0 +1,53 @@
+Generate exactly {batch_size} high-quality Alpaca-format training examples for: {use_case}
+
+DOMAIN CONTEXT: {domain_context}
+
+## ALPACA FORMAT SPECIFICATIONS
+
+The Alpaca format consists of three fields:
+- **instruction**: Clear, specific task description
+- **input**: Optional context or data (can be empty string)
+- **output**: Complete, helpful response
+
+## QUALITY STANDARDS
+
+### Instruction Quality:
+- Be specific about what you want the model to do
+- Use action verbs (explain, analyze, create, compare, etc.)
+- Include necessary constraints or requirements
+- Avoid ambiguous language
+
+### Input Usage:
+- Provide context when the instruction needs it
+- Include relevant data, examples, or scenarios
+- Use empty string ("") when no context is needed
+- Don't duplicate information from instruction
+
+### Output Excellence:
+- Directly address the instruction
+- Provide complete, actionable responses
+- Include examples or explanations when helpful
+- Maintain appropriate length for the task
+
+## DIVERSITY GUIDELINES
+
+Create examples across these categories:
+- **Explanatory**: Explain concepts, processes, or phenomena
+- **Analytical**: Analyze data, situations, or problems
+- **Creative**: Generate content, ideas, or solutions
+- **Comparative**: Compare and contrast different options
+- **Instructional**: Provide step-by-step guidance
+- **Problem-solving**: Address specific challenges
+
+## EXAMPLES TO FOLLOW
+
+High-quality instruction patterns:
+- "Explain [concept] to [audience] using [approach]"
+- "Analyze [data/situation] and provide [specific output]"
+- "Create a [type] for [purpose] that includes [requirements]"
+- "Compare [A] and [B] in terms of [criteria]"
+
+Output ONLY valid JSON array:
+[
+  {"instruction": "...", "input": "...", "output": "..."}
+]

@@ -32,4 +32,13 @@ tokio-util = "0.7"
 tracing = "0.1"
 uuid = { version = "1.0", features = ["v4"] }
 dotenvy = "0.15"
+# Quality validation and vector storage
+sha2 = "0.10"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+# Process management for ChromaDB server
+which = "6.0"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
 

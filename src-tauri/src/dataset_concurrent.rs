@@ -7,8 +7,10 @@ use tokio::sync::{mpsc, RwLock, Semaphore};
 use tokio_util::sync::CancellationToken;
 use anyhow::Result;
 use crate::types::{
-    DatasetEntry, ModelProvider, GenerationTask, BatchResult
+    DatasetEntry, ModelProvider, GenerationTask, BatchResult, DatasetFormat
 };
+use crate::prompt_template::PromptTemplateEngine;
+use crate::quality_validator::ValidationFeedback;
 
 /// Configuration for concurrent dataset generation
 #[derive(Debug, Clone)]
@@ -20,6 +22,7 @@ pub struct ConcurrentGenerationConfig {
     pub max_retries: usize,
     pub retry_delay: Duration,
     pub request_timeout: Duration,
+    pub dataset_format: crate::types::DatasetFormat,
 }
 
 impl Default for ConcurrentGenerationConfig {
@@ -32,6 +35,7 @@ impl Default for ConcurrentGenerationConfig {
             max_retries: 3,
             retry_delay: Duration::from_millis(1000),
             request_timeout: Duration::from_secs(30),
+            dataset_format: crate::types::DatasetFormat::Alpaca,
         }
     }
 }
@@ -86,15 +90,50 @@ impl SimpleRateLimiter {
     }
 }
 
-/// Highly optimized concurrent dataset generator
+/// Highly optimized concurrent dataset generator with enhanced prompt system
 pub struct ConcurrentDatasetGenerator {
     config: ConcurrentGenerationConfig,
     ollama_rate_limiter: SimpleRateLimiter,
     openai_rate_limiter: SimpleRateLimiter,
     client: reqwest::Client,
+    prompt_engine: PromptTemplateEngine,
+    validation_feedback_history: Arc<RwLock<Vec<ValidationFeedback>>>,
 }
 
 impl ConcurrentDatasetGenerator {
+    /// Parse generated entries from model output
+    fn parse_generated_entries(&self, text: &str, expected_count: usize) -> Result<Vec<DatasetEntry>, anyhow::Error> {
+        tracing::info!("Parsing generated entries, expected count: {}", expected_count);
+        // Try to extract JSON from the response (handle cases where there's extra text)
+        let json_text = if let Some(start) = text.find('[') {
+            if let Some(end) = text.rfind(']') {
+                &text[start..=end]
+            } else {
+                text
+            }
+        } else {
+            text
+        };
+
+        tracing::debug!("Extracted JSON text: {}", json_text);
+
+        match serde_json::from_str::<Vec<DatasetEntry>>(json_text) {
+            Ok(entries) => {
+                tracing::info!("Successfully parsed {} entries from JSON", entries.len());
+                if entries.is_empty() {
+                    tracing::warn!("Parsed entries is empty, generating fallback");
+                    Ok(self.generate_fallback_entries(expected_count))
+                } else {
+                    Ok(entries)
+                }
+            }
+            Err(e) => {
+                tracing::warn!("Failed to parse generated JSON: {}, using fallback entries", e);
+                tracing::debug!("Failed JSON content: {}", json_text);
+                Ok(self.generate_fallback_entries(expected_count))
+            }
+        }
+    }
     pub fn new(config: ConcurrentGenerationConfig) -> Self {
         // Create rate limiters for different providers
         let ollama_rate_limiter = SimpleRateLimiter::new(config.ollama_requests_per_second);
@@ -108,12 +147,47 @@ impl ConcurrentDatasetGenerator {
             .build()
             .expect("Failed to create HTTP client");
 
+        // Initialize prompt template engine
+        let prompt_engine = PromptTemplateEngine::new();
+
         Self {
             config,
             ollama_rate_limiter,
             openai_rate_limiter,
             client,
+            prompt_engine,
+            validation_feedback_history: Arc::new(RwLock::new(Vec::new())),
         }
+    }
+
+    /// Update the generator with validation feedback for continuous improvement
+    pub async fn update_with_feedback(
+        &mut self,
+        feedback: ValidationFeedback,
+        format: &DatasetFormat,
+        batch_quality_score: f32,
+    ) -> Result<()> {
+        // Store feedback in history
+        {
+            let mut history = self.validation_feedback_history.write().await;
+            history.push(feedback.clone());
+            
+            // Keep only recent feedback (last 50 entries)
+            if history.len() > 50 {
+                *history = history.iter().rev().take(50).rev().cloned().collect();
+            }
+        }
+
+        // Update prompt templates based on feedback
+        self.prompt_engine.update_template_with_feedback(format, &feedback, batch_quality_score)?;
+
+        tracing::info!(
+            "Updated generator with feedback: {} suggestions, {} avoid patterns",
+            feedback.improvement_suggestions.len(),
+            feedback.avoid_patterns.len()
+        );
+
+        Ok(())
     }
 
     /// Generate dataset entries with full concurrency optimization
@@ -491,74 +565,46 @@ impl ConcurrentDatasetGenerator {
 
     /// Create an optimized prompt for better generation quality
     fn create_optimized_prompt(&self, goal: &str, batch_size: usize, context: &str) -> String {
-        format!(
-            r#"Generate exactly {} high-quality training examples for the following fine-tuning objective:
-
-OBJECTIVE: {}
-CONTEXT: {}
-
-Requirements:
-1. Each example must have three fields: "instruction", "input", and "output"
-2. Instructions should be clear, specific, and actionable
-3. Inputs should provide relevant context or data
-4. Outputs should be comprehensive and helpful responses
-5. Ensure diversity in topics, complexity, and formats
-6. Make examples realistic and practical
-
-Return ONLY a valid JSON array with no additional text:
-[
-  {{"instruction": "...", "input": "...", "output": "..."}},
-  {{"instruction": "...", "input": "...", "output": "..."}}
-]"#,
-            batch_size, goal, context
-        )
-    }
-
-    /// Parse generated entries with robust error handling
-    fn parse_generated_entries(&self, text: &str, expected_count: usize) -> Result<Vec<DatasetEntry>> {
-        tracing::info!("Parsing generated entries, expected count: {}", expected_count);
-        
-        // Try to extract JSON from the response (handle cases where there's extra text)
-        let json_text = if let Some(start) = text.find('[') {
-            if let Some(end) = text.rfind(']') {
-                &text[start..=end]
-            } else {
-                text
-            }
-        } else {
-            text
+        let format_schema = match self.config.dataset_format {
+            crate::types::DatasetFormat::RetrievalEmbedding => "{\"query\": \"...\", \"positive_passage\": \"...\", \"negative_passages\": [\"...\", \"...\"]}",
+            crate::types::DatasetFormat::Alpaca => "{\"instruction\": \"...\", \"input\": \"...\", \"output\": \"...\"}",
+            // ...add other formats as needed...
+            _ => "{...}"
         };
-
-        tracing::debug!("Extracted JSON text: {}", json_text);
-
-        match serde_json::from_str::<Vec<DatasetEntry>>(json_text) {
-            Ok(entries) => {
-                tracing::info!("Successfully parsed {} entries from JSON", entries.len());
-                if entries.is_empty() {
-                    tracing::warn!("Parsed entries is empty, generating fallback");
-                    Ok(self.generate_fallback_entries(expected_count))
-                } else {
-                    Ok(entries)
-                }
-            }
-            Err(e) => {
-                tracing::warn!("Failed to parse generated JSON: {}, using fallback entries", e);
-                tracing::debug!("Failed JSON content: {}", json_text);
-                Ok(self.generate_fallback_entries(expected_count))
-            }
-        }
+        format!(
+            "Generate {} training examples for fine-tuning goal: {}. Context: {}.\n\nReturn only a JSON array of objects matching this exact schema: {}.\nDo not use any other format.\nGoal: {}",
+            batch_size, goal, context, format_schema, goal
+        )
     }
 
     /// Generate fallback entries when parsing fails
     fn generate_fallback_entries(&self, count: usize) -> Vec<DatasetEntry> {
+        let format = &self.config.dataset_format;
         (0..count)
-            .map(|i| DatasetEntry {
-                instruction: format!("Sample instruction {}", i + 1),
-                input: format!("Sample input context {}", i + 1),
-                output: format!("Sample response output {}", i + 1),
+            .map(|i| {
+                let data = match format {
+                    crate::types::DatasetFormat::Alpaca => serde_json::json!({
+                        "instruction": format!("Sample instruction {}", i + 1),
+                        "input": format!("Sample input context {}", i + 1),
+                        "output": format!("Sample response output {}", i + 1)
+                    }),
+                    crate::types::DatasetFormat::RetrievalEmbedding => serde_json::json!({
+                        "query": format!("Sample query {}", i + 1),
+                        "positive_passage": format!("Relevant passage {}", i + 1),
+                        "negative_passages": [format!("Irrelevant passage {}", i + 1), format!("Another irrelevant passage {}", i + 1)]
+                    }),
+                    // ...add other formats as needed...
+                    _ => serde_json::json!({
+                        "instruction": format!("Sample instruction {}", i + 1),
+                        "input": format!("Sample input context {}", i + 1),
+                        "output": format!("Sample response output {}", i + 1)
+                    })
+                };
+                DatasetEntry { data }
             })
             .collect()
     }
+
 }
 
 // Implement Clone for SimpleRateLimiter
@@ -579,6 +625,8 @@ impl Clone for ConcurrentDatasetGenerator {
             ollama_rate_limiter: self.ollama_rate_limiter.clone(),
             openai_rate_limiter: self.openai_rate_limiter.clone(),
             client: self.client.clone(),
+            prompt_engine: PromptTemplateEngine::new(), // Create new instance for clone
+            validation_feedback_history: self.validation_feedback_history.clone(),
         }
     }
 }

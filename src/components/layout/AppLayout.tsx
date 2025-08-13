@@ -37,31 +37,32 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, error, success }
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-6 py-8 max-w-8xl">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-400 dark:via-purple-400 dark:to-blue-600 bg-clip-text text-transparent mb-6">
+        <div className="text-center mb-16">
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-400 dark:via-purple-400 dark:to-blue-600 bg-clip-text text-transparent mb-8 leading-tight">
               AI Dataset Generator
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-10">
               Generate high-quality fine-tuning datasets using local and cloud AI models with intelligent batch processing and advanced optimization
             </p>
             
             {/* Feature Pills */}
-            <div className="flex flex-wrap justify-center gap-3 mt-8">
+            <div className="flex flex-wrap justify-center gap-4 mt-10">
               {[
-                '🤖 Multiple AI Models',
-                '⚡ Batch Processing',
-                '🎯 Custom Fine-tuning',
-                '📊 Real-time Progress',
-                '💾 Export Ready'
+                { icon: '🤖', text: 'Multiple AI Models' },
+                { icon: '⚡', text: 'Batch Processing' },
+                { icon: '🎯', text: 'Custom Fine-tuning' },
+                { icon: '📊', text: 'Real-time Progress' },
+                { icon: '💾', text: 'Export Ready' }
               ].map((feature, index) => (
                 <div
                   key={index}
-                  className="px-4 py-2 bg-muted/50 dark:bg-muted/20 rounded-full text-sm text-muted-foreground border border-border/50"
+                  className="px-6 py-3 bg-gradient-to-r from-muted/60 to-muted/40 dark:from-muted/30 dark:to-muted/20 rounded-2xl text-base text-muted-foreground border border-border/50 hover:border-border transition-colors backdrop-blur-sm shadow-sm"
                 >
-                  {feature}
+                  <span className="mr-3 text-lg">{feature.icon}</span>
+                  {feature.text}
                 </div>
               ))}
             </div>
@@ -84,10 +85,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, error, success }
         )}
 
         {/* Main Content Card */}
-        <div className="bg-card/50 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8 md:p-12">
+        <div className="bg-card/60 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-10 md:p-16 mb-12">
           <div className="relative">
             {/* Decorative gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-3xl pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/5 to-pink-500/8 rounded-3xl pointer-events-none" />
             
             {/* Content */}
             <div className="relative z-10">
@@ -97,17 +98,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, error, success }
         </div>
 
         {/* Footer */}
-        <div className="mt-12 text-center">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2">
+        <div className="mt-16 text-center">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-base text-muted-foreground mb-6">
+            <p className="flex items-center gap-3">
               <span>Supports Ollama local models and OpenAI API</span>
-              <span className="hidden md:inline">•</span>
             </p>
+            <span className="hidden md:inline w-1 h-1 bg-muted-foreground rounded-full"></span>
             <p>Advanced batch processing for optimal efficiency</p>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground">
+          <div className="pt-6 border-t border-border/30">
+            <p className="text-sm text-muted-foreground">
               Built with React, TypeScript, Tauri, and Tailwind CSS
             </p>
           </div>

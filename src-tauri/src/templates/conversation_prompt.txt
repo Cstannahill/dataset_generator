@@ -1,0 +1,58 @@
+Generate exactly {batch_size} high-quality conversation examples for: {use_case}
+
+DOMAIN CONTEXT: {domain_context}
+
+## CONVERSATION FORMAT SPECIFICATIONS
+
+Each conversation should be an array of message objects with:
+- **role**: "user" or "assistant"
+- **content**: The message content
+
+## CONVERSATION QUALITY STANDARDS
+
+### Natural Flow:
+- Start with realistic user queries or requests
+- Maintain context throughout the conversation
+- Each response should build on previous messages
+- End conversations at natural stopping points
+
+### User Messages:
+- Use natural, conversational language
+- Include various question types and requests
+- Show different levels of specificity
+- Represent realistic user behaviors
+
+### Assistant Responses:
+- Directly address user queries
+- Provide helpful, accurate information
+- Ask clarifying questions when appropriate
+- Maintain consistent personality and tone
+
+## CONVERSATION PATTERNS
+
+Create diverse conversation types:
+- **Information seeking**: User asks questions, assistant provides answers
+- **Problem solving**: User presents issue, assistant guides to solution
+- **Task assistance**: User needs help with specific tasks
+- **Clarification**: Multi-turn exchanges to understand requirements
+- **Follow-up**: Continued conversation building on previous topics
+
+## QUALITY CHECKPOINTS
+
+Ensure each conversation:
+- Has 2-6 message exchanges
+- Maintains logical flow and context
+- Provides value in every assistant response
+- Uses appropriate tone for the domain
+- Resolves or progresses the user's need
+
+## LENGTH GUIDELINES
+
+- **Short**: 2-3 exchanges for simple Q&A
+- **Medium**: 4-5 exchanges for problem-solving
+- **Long**: 6+ exchanges for complex assistance
+
+Output ONLY valid JSON array where each entry contains a "conversation" field:
+[
+  {"conversation": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}
+]

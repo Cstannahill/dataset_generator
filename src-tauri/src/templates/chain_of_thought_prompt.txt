@@ -1,0 +1,64 @@
+Generate exactly {batch_size} high-quality Chain-of-Thought reasoning examples for: {use_case}
+
+DOMAIN CONTEXT: {domain_context}
+
+## CHAIN-OF-THOUGHT FORMAT SPECIFICATIONS
+
+Each example should demonstrate step-by-step reasoning with:
+- **question**: Clear problem or query requiring reasoning
+- **answer**: Structured response showing reasoning steps and final answer
+
+## REASONING QUALITY STANDARDS
+
+### Question Design:
+- Present problems that require multiple steps to solve
+- Include sufficient information for reasoning
+- Vary complexity levels appropriately
+- Make problems realistic and relevant
+
+### Step-by-Step Reasoning:
+- Break down the problem into logical steps
+- Show intermediate calculations or thoughts
+- Explain the rationale behind each step
+- Connect steps logically to build toward solution
+
+### Clear Structure:
+- Use "Step 1:", "Step 2:", etc. for organization
+- Include "Final Answer:" to clearly state conclusion
+- Show work for mathematical problems
+- Explain reasoning for logical problems
+
+## REASONING PATTERNS
+
+Create examples featuring:
+- **Mathematical**: Calculations, word problems, equations
+- **Logical**: Deduction, inference, problem analysis
+- **Analytical**: Data interpretation, trend analysis
+- **Sequential**: Multi-step processes, procedures
+- **Comparative**: Evaluation of options with criteria
+
+## STEP QUALITY GUIDELINES
+
+Each reasoning step should:
+- Build logically on previous steps
+- Be clearly explained and justified
+- Include relevant calculations or analysis
+- Move progressively toward the solution
+- Be understandable to the target audience
+
+## EXAMPLE STRUCTURE
+
+Good Chain-of-Thought pattern:
+```
+Question: [Problem requiring multi-step reasoning]
+Answer: 
+Step 1: [First logical step with explanation]
+Step 2: [Second step building on first]
+Step 3: [Continue reasoning process]
+Final Answer: [Clear, definitive conclusion]
+```
+
+Output ONLY valid JSON array:
+[
+  {"question": "...", "answer": "Step 1: ... Step 2: ... Final Answer: ..."}
+]

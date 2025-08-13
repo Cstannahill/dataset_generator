@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .claude
+
+.env
+
+.venv
+.vscode/
+dist
+node_modules
+pnpm-lock.yaml

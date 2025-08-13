@@ -16,11 +16,34 @@ pub enum ModelProvider {
     OpenAI,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, Eq, PartialEq)]
+pub enum DatasetFormat {
+    #[serde(rename = "alpaca")]
+    Alpaca,
+    #[serde(rename = "conversation")]
+    Conversation,
+    #[serde(rename = "chain_of_thought")]
+    ChainOfThought,
+    #[serde(rename = "preference_ranking")]
+    PreferenceRanking,
+    #[serde(rename = "function_call")]
+    FunctionCall,
+    #[serde(rename = "multi_round_dialogue")]
+    MultiRoundDialogue,
+    #[serde(rename = "code_task")]
+    CodeTask,
+    #[serde(rename = "reflection")]
+    Reflection,
+    #[serde(rename = "retrieval_embedding")]
+    RetrievalEmbedding,
+    #[serde(rename = "reranking")]
+    Reranking,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DatasetEntry {
-    pub instruction: String,
-    pub input: String,
-    pub output: String,
+    #[serde(flatten)]
+    pub data: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,6 +53,7 @@ pub struct GenerationConfig {
     pub selected_model: String,
     pub fine_tuning_goal: String,
     pub domain_context: String,
+    pub format: DatasetFormat,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

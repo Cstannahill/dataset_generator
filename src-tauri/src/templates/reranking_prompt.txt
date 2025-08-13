@@ -1,0 +1,82 @@
+Generate exactly {batch_size} high-quality reranking examples for: {use_case}
+
+DOMAIN CONTEXT: {domain_context}
+
+## RERANKING FORMAT SPECIFICATIONS
+
+Each example should contain:
+- **query**: User search query or information need
+- **positive_document**: Highly relevant document/passage
+- **negative_document**: Less relevant or irrelevant document/passage
+
+## RELEVANCE QUALITY STANDARDS
+
+### Query Design:
+- Create realistic, specific search queries
+- Include various types of information needs
+- Use natural language patterns
+- Vary complexity and specificity levels
+
+### Positive Document Characteristics:
+- Directly answers or addresses the query
+- Contains specific, relevant information
+- Uses terminology related to the query
+- Provides comprehensive coverage of the topic
+
+### Negative Document Characteristics:
+- Shares some topical similarity but lacks relevance
+- Misses key aspects of the query
+- Provides tangential or outdated information
+- Contains general information when specific is needed
+
+## RELEVANCE CONTRAST PATTERNS
+
+Create clear relevance differences through:
+
+### Topic Relevance:
+- Positive: Directly on-topic with query intent
+- Negative: Related domain but different focus
+
+### Specificity Matching:
+- Positive: Matches query specificity level
+- Negative: Too general or overly specific
+
+### Information Quality:
+- Positive: Accurate, current, authoritative
+- Negative: Outdated, inaccurate, or unsubstantiated
+
+### Intent Alignment:
+- Positive: Addresses user's underlying need
+- Negative: Misinterprets or ignores user intent
+
+## RERANKING SCENARIOS
+
+Generate diverse query types:
+- **Factual**: Looking for specific information
+- **How-to**: Seeking procedural guidance
+- **Comparison**: Evaluating options or alternatives
+- **Troubleshooting**: Solving specific problems
+- **Research**: Gathering comprehensive information
+
+## DOCUMENT TYPES
+
+Include various content formats:
+- **Explanatory**: Concept explanations and definitions
+- **Procedural**: Step-by-step instructions
+- **Analytical**: Data analysis and insights
+- **Review**: Evaluations and recommendations
+- **News**: Current events and updates
+
+## REALISM REQUIREMENTS
+
+Ensure realistic search scenarios:
+- Use natural query language
+- Include domain-specific terminology appropriately
+- Create believable document excerpts
+- Maintain consistent quality gaps
+- Represent real search result variations
+
+Output ONLY valid JSON array:
+[
+  {"query": "...", "positive_document": "...", "negative_document": "..."}
+]

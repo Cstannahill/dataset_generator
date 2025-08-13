@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use tokio::sync::RwLock;
 use tokio_util::sync::CancellationToken;
 use crate::types::{Model, DatasetEntry, GenerationConfig, GenerationProgress};
+use crate::knowledge_base::KnowledgeBaseManager;
+use crate::chromadb_server::ChromaDbServerManager;
 
 pub struct AppState {
     pub models: Arc<RwLock<Vec<Model>>>,
@@ -10,6 +12,8 @@ pub struct AppState {
     pub generation_config: Arc<RwLock<Option<GenerationConfig>>>,
     pub progress: Arc<RwLock<GenerationProgress>>,
     pub active_generations: Arc<RwLock<HashMap<String, CancellationToken>>>,
+    pub knowledge_base_manager: Arc<RwLock<Option<KnowledgeBaseManager>>>,
+    pub chromadb_server: Arc<ChromaDbServerManager>,
 }
 
 impl AppState {
@@ -31,6 +35,8 @@ impl AppState {
                 retries_count: 0,
             })),
             active_generations: Arc::new(RwLock::new(HashMap::new())),
+            knowledge_base_manager: Arc::new(RwLock::new(None)),
+            chromadb_server: Arc::new(ChromaDbServerManager::new()),
         }
     }
 }
